@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>🫶 Future Love Gesture Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a0015 0%, #1a0a2e 30%, #2d1b3d 60%, #1a0a2e 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255, 0, 150, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(150, 0, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(255, 50, 100, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 720px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header with neon glow */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #ff6b9d, #ff2d75, #ff6b9d);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 3s ease-in-out infinite;
+            text-shadow: none;
+            filter: drop-shadow(0 0 30px rgba(255, 45, 117, 0.3));
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .header .sub {
+            color: rgba(255, 200, 230, 0.7);
+            font-size: 0.95rem;
+            letter-spacing: 3px;
+            margin-top: 4px;
+            font-weight: 300;
+        }
+
+        /* Live Camera Card */
+        .camera-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 32px;
+            padding: 20px;
+            border: 1px solid rgba(255, 100, 150, 0.2);
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05),
+                0 0 80px rgba(255, 0, 150, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .camera-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(255, 0, 150, 0.03), transparent, rgba(150, 0, 255, 0.03), transparent);
+            animation: rotateGlow 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rotateGlow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .video-wrapper {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            background: #0d0015;
+            box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.8);
+            aspect-ratio: 4/3;
+        }
+
+        #video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+            display: block;
+        }
+
+        /* Live indicator */
+        .live-badge {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: rgba(255, 0, 50, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: white;
+            letter-spacing: 1.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(255, 50, 100, 0.3);
+            z-index: 10;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #ff0040;
+            border-radius: 50%;
+            animation: pulse 1.2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.8); }
+        }
+
+        /* Gesture overlay */
+        .gesture-overlay {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .gesture-badge {
+            display: inline-block;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 12px 30px;
+            border-radius: 60px;
+            border: 1px solid rgba(255, 200, 220, 0.15);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #fff;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .gesture-badge .gesture-emoji {
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        /* Love Message Box - Future style */
+        .message-box {
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 24px 20px;
+            border: 1px solid rgba(255, 100, 150, 0.15);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .message-box::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255, 0, 150, 0.03), transparent);
+            pointer-events: none;
+        }
+
+        #loveText {
+            font-size: 2.2rem;
+            font-weight: 500;
+            color: #fff;
+            text-shadow: 
+                0 0 20px rgba(255, 50, 100, 0.3),
+                0 0 60px rgba(255, 0, 150, 0.1);
+            line-height: 1.4;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        #loveText .msg-emoji {
+            font-size: 3rem;
+            display: inline-block;
+            animation: floatEmoji 3s ease-in-out infinite;
+        }
+
+        @keyframes floatEmoji {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-8px) scale(1.1); }
+        }
+
+        #loveText .msg-text {
+            font-size: 1.8rem;
+            background: linear-gradient(45deg, #ff99bb, #ff6b9d, #ff99bb);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 3s ease-in-out infinite;
+        }
+
+        /* Gesture legend - new emojis */
+        .legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 16px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .legend-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: rgba(255, 200, 220, 0.6);
+            font-size: 0.7rem;
+            font-weight: 300;
+            padding: 6px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .legend-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: scale(1.05);
+        }
+
+        .legend-item .legend-emoji {
+            font-size: 1.6rem;
+        }
+        .legend-item .legend-label {
+            font-size: 0.6rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 16px;
+            color: rgba(255, 200, 220, 0.3);
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            font-weight: 300;
+        }
+
+        /* Responsive */
+        @media (max-width: 500px) {
+            .header h1 { font-size: 1.6rem; }
+            #loveText .msg-text { font-size: 1.3rem; }
+            #loveText .msg-emoji { font-size: 2.4rem; }
+            .gesture-badge { font-size: 1.2rem; padding: 8px 20px; }
+            .legend { grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); }
+            .camera-card { padding: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🫶 Future Love Hub</h1>
+            <div class="sub">✦ gesture · feel · express ✦</div>
+        </div>
+
+        <!-- Camera Card -->
+        <div class="camera-card">
+            <div class="video-wrapper">
+                <video id="video" autoplay playsinline muted></video>
+                
+                <!-- Live Badge -->
+                <div class="live-badge">
+                    <span class="live-dot"></span>
+                    LIVE
+                </div>
+
+                <!-- Gesture Badge -->
+                <div class="gesture-overlay">
+                    <div class="gesture-badge" id="gestureBadge">
+                        <span class="gesture-emoji">🫶</span>
+                        <span id="gestureName">Ready</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Love Message -->
+        <div class="message-box">
+            <div id="loveText">
+                <span class="msg-emoji">🩷</span>
+                <span class="msg-text">you are my universe</span>
+            </div>
+        </div>
+
+        <!-- Legend with New Emojis -->
+        <div class="legend">
+            <div class="legend-item">
+                <span class="legend-emoji">🫶</span>
+                <span class="legend-label">Open Hand</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-emoji">🔥</span>
+                <span class="legend-label">Fist</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-emoji">💫</span>
+                <span class="legend-label">ILY Sign</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-emoji">✨</span>
+                <span class="legend-label">Thumb Up</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-emoji">🌈</span>
+                <span class="legend-label">Thumb Down</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-emoji">🎀</span>
+                <span class="legend-label">Shaka</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-emoji">💗</span>
+                <span class="legend-label">Point Up</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-emoji">🕊️</span>
+                <span class="legend-label">Peace</span>
+            </div>
+        </div>
+
+        <div class="footer">✦ powered by love · live camera gestures ✦</div>
+    </div>
+
+    <script>
+        (function() {
+            // ---------- NEW EMOJI + MESSAGE DATABASE ----------
+            const loveDatabase = {
+                'open': {
+                    emoji: '🩷',
+                    badge: '🫶 Open',
+                    msg: 'you are my soulmate forever'
+                },
+                'fist': {
+                    emoji: '🔥',
+                    badge: '🔥 Fist',
+                    msg: 'our love is fire'
+                },
+                'ily': {
+                    emoji: '💫',
+                    badge: '💫 ILY',
+                    msg: "you're my universe"
+                },
+                'thumb': {
+                    emoji: '✨',
+                    badge: '✨ Thumb Up',
+                    msg: 'you make magic happen'
+                },
+                'thumbdown': {
+                    emoji: '🌈',
+                    badge: '🌈 Thumb Down',
+                    msg: 'you are my silver lining'
+                },
+                'shaka': {
+                    emoji: '🎀',
+                    badge: '🤙 Shaka',
+                    msg: "you're my perfect gift"
+                },
+                'pointup': {
+                    emoji: '💗',
+                    badge: '👆 Point Up',
+                    msg: 'you lift me higher'
+                },
+                'peace': {
+                    emoji: '🕊️',
+                    badge: '✌️ Peace',
+                    msg: "you're my peace"
+                }
+            };
+
+            // Fallback romantic messages
+            const fallbackMessages = [
+                { emoji: '🩷', msg: 'my heart beats for you' },
+                { emoji: '💗', msg: 'you are my everything' },
+                { emoji: '💖', msg: 'i choose you always' },
+                { emoji: '💕', msg: 'you + me = infinite' },
+                { emoji: '💞', msg: 'soulmates forever' },
+                { emoji: '💓', msg: 'my love, my light' },
+                { emoji: '💝', msg: 'forever starts with you' },
+                { emoji: '❤️‍🔥', msg: 'you are my heartbeat' }
+            ];
+
+            // DOM Elements
+            const video = document.getElementById('video');
+            const loveTextEl = document.getElementById('loveText');
+            const gestureBadgeEl = document.getElementById('gestureBadge');
+            const gestureNameEl = document.getElementById('gestureName');
+
+            let lastGesture = 'none';
+            let frameSkip = 0;
+
+            // ---------- CAMERA SETUP ----------
+            async function setupCamera() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: { 
+                            facingMode: 'user', 
+                            width: { ideal: 640 }, 
+                            height: { ideal: 480 } 
+                        }
+                    });
+                    video.srcObject = stream;
+                    await video.play();
+                    return true;
+                } catch (err) {
+                    console.warn('Camera error:', err);
+                    loveTextEl.innerHTML = `
+                        <span class="msg-emoji">📷</span>
+                        <span class="msg-text">please allow camera for love</span>
+                    `;
+                    gestureBadgeEl.innerHTML = '<span class="gesture-emoji">⚠️</span> No Camera';
+                    return false;
+                }
+            }
+
+            // ---------- GESTURE DETECTION (Improved) ----------
+            function detectGesture(videoElement) {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const w = 80, h = 60;
+                canvas.width = w;
+                canvas.height = h;
+
+                ctx.drawImage(videoElement, 0, 0, w, h);
+                const imageData = ctx.getImageData(0, 0, w, h);
+                const data = imageData.data;
+
+                // Sample center region
+                let r = 0, g = 0, b = 0, count = 0;
+                const centerY = Math.floor(h * 0.45);
+                const centerX = Math.floor(w * 0.5);
+
+                for (let y = centerY - 10; y < centerY + 10; y++) {
+                    for (let x = centerX - 14; x < centerX + 14; x++) {
+                        const idx = (y * w + x) * 4;
+                        r += data[idx];
+                        g += data[idx + 1];
+                        b += data[idx + 2];
+                        count++;
+                    }
+                }
+                r /= count;
+                g /= count;
+                b /= count;
+
+                const isSkin = (r > 80 && g > 40 && b > 30 && r > g && r > b && (r - g) > 15);
+                const brightness = (r + g + b) / 3;
+
+                if (!isSkin || brightness < 35) return 'none';
+
+                // Check corners for open hand
+                let cornerSkin = 0;
+                const corners = [[10,10], [w-10,10], [10,h-10], [w-10,h-10]];
+                for (let [cx, cy] of corners) {
+                    const idx = (cy * w + cx) * 4;
+                    const r2 = data[idx], g2 = data[idx+1], b2 = data[idx+2];
+                    if (r2 > 70 && g2 > 35 && b2 > 25 && r2 > g2 && r2 > b2) cornerSkin++;
+                }
+
+                // Detect Thumb Up
+                let thumbUp = false;
+                for (let dy = -4; dy <= 4; dy++) {
+                    for (let dx = -4; dx <= 4; dx++) {
+                        const px = Math.floor(w * 0.75) + dx;
+                        const py = Math.floor(h * 0.2) + dy;
+                        if (px < 0 || px >= w || py < 0 || py >= h) continue;
+                        const idx = (py * w + px) * 4;
+                        const rt = data[idx], gt = data[idx+1], bt = data[idx+2];
+                        if (rt > 100 && gt > 40 && bt > 30 && rt > gt && rt > bt) {
+                            thumbUp = true;
+                            break;
+                        }
+                    }
+                    if (thumbUp) break;
+                }
+
+                // Detect Thumb Down
+                let thumbDown = false;
+                for (let dy = -4; dy <= 4; dy++) {
+                    for (let dx = -4; dx <= 4; dx++) {
+                        const px = Math.floor(w * 0.75) + dx;
+                        const py = Math.floor(h * 0.8) + dy;
+                        if (px < 0 || px >= w || py < 0 || py >= h) continue;
+                        const idx = (py * w + px) * 4;
+                        const rt = data[idx], gt = data[idx+1], bt = data[idx+2];
+                        if (rt > 100 && gt > 40 && bt > 30 && rt > gt && rt > bt) {
+                            thumbDown = true;
+                            break;
+                        }
+                    }
+                    if (thumbDown) break;
+                }
+
+                // Detect ILY (pinky + thumb)
+                let pinkyCount = 0, thumbCount = 0;
+                for (let dy = -4; dy <= 4; dy++) {
+                    for (let dx = -4; dx <= 4; dx++) {
+                        const px1 = Math.floor(w * 0.2) + dx;
+                        const py1 = Math.floor(h * 0.7) + dy;
+                        if (px1 >= 0 && px1 < w && py1 >= 0 && py1 < h) {
+                            const idx = (py1 * w + px1) * 4;
+                            if (data[idx] > 80 && data[idx+1] > 30 && data[idx+2] > 20) pinkyCount++;
+                        }
+                        const px2 = Math.floor(w * 0.75) + dx;
+                        const py2 = Math.floor(h * 0.2) + dy;
+                        if (px2 >= 0 && px2 < w && py2 >= 0 && py2 < h) {
+                            const idx = (py2 * w + px2) * 4;
+                            if (data[idx] > 80 && data[idx+1] > 30 && data[idx+2] > 20) thumbCount++;
+                        }
+                    }
+                }
+                const ilyDetect = (pinkyCount > 20 && thumbCount > 20);
+
+                // Detect Shaka (hang loose) - thumb + pinky spread
+                let shakaDetect = false;
+                let shakaPinky = 0, shakaThumb = 0;
+                for (let dy = -3; dy <= 3; dy++) {
+                    for (let dx = -3; dx <= 3; dx++) {
+                        const px1 = Math.floor(w * 0.15) + dx;
+                        const py1 = Math.floor(h * 0.7) + dy;
+                        if (px1 >= 0 && px1 < w && py1 >= 0 && py1 < h) {
+                            const idx = (py1 * w + px1) * 4;
+                            if (data[idx] > 70 && data[idx+1] > 30 && data[idx+2] > 20) shakaPinky++;
+                        }
+                        const px2 = Math.floor(w * 0.8) + dx;
+                        const py2 = Math.floor(h * 0.2) + dy;
+                        if (px2 >= 0 && px2 < w && py2 >= 0 && py2 < h) {
+                            const idx = (py2 * w + px2) * 4;
+                            if (data[idx] > 70 && data[idx+1] > 30 && data[idx+2] > 20) shakaThumb++;
+                        }
+                    }
+                }
+                if (shakaPinky > 15 && shakaThumb > 15) shakaDetect = true;
+
+                // Detect Peace Sign (two fingers up)
+                let peaceDetect = false;
+                let indexCount = 0, middleCount = 0;
+                for (let dy = -3; dy <= 3; dy++) {
+                    for (let dx = -3; dx <= 3; dx++) {
+                        const px1 = Math.floor(w * 0.4) + dx;
+                        const py1 = Math.floor(h * 0.25) + dy;
+                        if (px1 >= 0 && px1 < w && py1 >= 0 && py1 < h) {
+                            const idx = (py1 * w + px1) * 4;
+                            if (data[idx] > 70 && data[idx+1] > 30 && data[idx+2] > 20) indexCount++;
+                        }
+                        const px2 = Math.floor(w * 0.55) + dx;
+                        const py2 = Math.floor(h * 0.25) + dy;
+                        if (px2 >= 0 && px2 < w && py2 >= 0 && py2 < h) {
+                            const idx = (py2 * w + px2) * 4;
+                            if (data[idx] > 70 && data[idx+1] > 30 && data[idx+2] > 20) middleCount++;
+                        }
+                    }
+                }
+                if (indexCount > 12 && middleCount > 12 && cornerSkin <= 2) peaceDetect = true;
+
+                // Detect Point Up (index finger only)
+                let pointUp = false;
+                let indexOnly = 0;
+                for (let dy = -3; dy <= 3; dy++) {
+                    for (let dx = -3; dx <= 3; dx++) {
+                        const px = Math.floor(w * 0.5) + dx;
+                        const py = Math.floor(h * 0.2) + dy;
+                        if (px >= 0 && px < w && py >= 0 && py < h) {
+                            const idx = (py * w + px) * 4;
+                            if (data[idx] > 70 && data[idx+1] > 30 && data[idx+2] > 20) indexOnly++;
+                        }
+                    }
+                }
+                if (indexOnly > 15 && cornerSkin <= 2 && !peaceDetect && !shakaDetect) pointUp = true;
+
+                // ---- Decision Logic ----
+                if (ilyDetect) return 'ily';
+                if (shakaDetect) return 'shaka';
+                if (peaceDetect) return 'peace';
+                if (pointUp) return 'pointup';
+                if (thumbUp) return 'thumb';
+                if (thumbDown) return 'thumbdown';
+                if (cornerSkin >= 3 && brightness > 65) return 'open';
+                if (cornerSkin <= 1 && brightness > 40) return 'fist';
+
+                return 'none';
+            }
+
+            // ---------- UPDATE UI ----------
+            function updateLove(gesture) {
+                let data;
+                let isFallback = false;
+
+                if (gesture !== 'none' && loveDatabase[gesture]) {
+                    data = loveDatabase[gesture];
+                } else {
+                    // Fallback to random love message
+                    const random = fallbackMessages[Math.floor(Math.random() * fallbackMessages.length)];
+                    data = {
+                        emoji: random.emoji,
+                        badge: '💕 Love',
+                        msg: random.msg
+                    };
+                    isFallback = true;
+                }
+
+                // Update message
+                loveTextEl.innerHTML = `
+                    <span class="msg-emoji">${data.emoji}</span>
+                    <span class="msg-text">${data.msg}</span>
+                `;
+
+                // Update badge
+                if (!isFallback && loveDatabase[gesture]) {
+                    const badgeParts = data.badge.split(' ');
+                    gestureBadgeEl.innerHTML = `
+                        <span class="gesture-emoji">${badgeParts[0]}</span>
+                        <span id="gestureName">${badgeParts.slice(1).join(' ')}</span>
+                    `;
+                } else {
+                    gestureBadgeEl.innerHTML = `
+                        <span class="gesture-emoji">💕</span>
+                        <span id="gestureName">${data.badge}</span>
+                    `;
+                }
+            }
+
+            // ---------- MAIN LOOP ----------
+            function processFrame() {
+                if (!video || video.readyState < 2) {
+                    requestAnimationFrame(processFrame);
+                    return;
+                }
+
+                frameSkip = (frameSkip + 1) % 3;
+                if (frameSkip === 0) {
+                    const gesture = detectGesture(video);
+                    if (gesture !== 'none') {
+                        if (gesture !== lastGesture) {
+                            lastGesture = gesture;
+                            updateLove(gesture);
+                        }
+                    } else if (lastGesture !== 'none') {
+                        // No gesture - show random love
+                        lastGesture = 'none';
+                        updateLove('none');
+                    }
+                }
+
+                requestAnimationFrame(processFrame);
+            }
+
+            // ---------- INIT ----------
+            async function init() {
+                const ok = await setupCamera();
+                if (ok) {
+                    setTimeout(() => processFrame(), 400);
+                }
+            }
+
+            init();
+        })();
+    </script>
+</body>
+</html>
