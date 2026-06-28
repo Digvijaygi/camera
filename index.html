@@ -1,374 +1,210 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>✨ Pastel Anime Girl · Canvas</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      background: #1a142b;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-family: 'Segoe UI', system-ui, sans-serif;
-    }
-    .frame {
-      background: #26213f;
-      border-radius: 2.8rem;
-      padding: 1.5rem;
-      box-shadow: 0 25px 40px rgba(0, 0, 0, 0.7), 0 0 0 2px #5b4a8a inset;
-    }
-    canvas {
-      display: block;
-      width: 700px;
-      height: 700px;
-      border-radius: 2rem;
-      background: radial-gradient(circle at 30% 30%, #2d254d, #140f24);
-      box-shadow: 0 0 35px #b396ff55;
-      transition: filter 0.2s;
-      cursor: crosshair;
-    }
-    canvas:hover {
-      filter: drop-shadow(0 0 22px #c9adff88);
-    }
-    .caption {
-      text-align: center;
-      margin-top: 1.2rem;
-      color: #cbb9ff;
-      font-weight: 400;
-      letter-spacing: 2px;
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      background: #211c3b;
-      padding: 0.5rem 2rem;
-      border-radius: 40px;
-      display: inline-block;
-      backdrop-filter: blur(4px);
-      border: 1px solid #6a56a8;
-      box-shadow: 0 0 25px #7a62cc44;
-    }
-    .wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Anime Generator</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        canvas {
+            background-color: #f4f4f9;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-radius: 15px;
+        }
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            background-color: #ff6b6b;
+            color: white;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        button:hover {
+            background-color: #ff4757;
+            transform: scale(1.05);
+        }
+        button.secondary {
+            background-color: #2ed573;
+        }
+        button.secondary:hover {
+            background-color: #26de81;
+        }
+    </style>
 </head>
 <body>
-<div class="wrapper">
-  <div class="frame">
-    <canvas id="animeCanvas" width="700" height="700"></canvas>
-  </div>
-  <div class="caption">🌸  pastel  ·  kawaii  ·  dream  🌸</div>
-</div>
-<script>
-  (function() {
-    const canvas = document.getElementById('animeCanvas');
-    const ctx = canvas.getContext('2d');
 
-    // ----------  Pastel Anime Girl  ----------
-    // Inspired by cute aesthetic, cat headphones, pink/purple vibes
-    function drawCharacter(time) {
-      ctx.clearRect(0, 0, 700, 700);
+    <h1>✨ Anime Avatar Generator</h1>
+    <canvas id="animeCanvas" width="400" height="500"></canvas>
+    
+    <div class="controls">
+        <button onclick="generateCharacter()">Generate New Character</button>
+        <button class="secondary" onclick="downloadImage()">Download as PNG</button>
+    </div>
 
-      // ----  background aura (soft & dreamy) ----
-      const wave = Math.sin(time * 0.5) * 0.15 + 0.85;
-      const glowPulse = Math.sin(time * 0.9) * 0.1 + 0.9;
+    <script>
+        const canvas = document.getElementById('animeCanvas');
+        const ctx = canvas.getContext('2d');
 
-      const bgGrad = ctx.createRadialGradient(350, 320, 30, 350, 320, 450);
-      bgGrad.addColorStop(0, `rgba(210, 180, 255, ${0.07 * wave})`);
-      bgGrad.addColorStop(0.6, `rgba(160, 120, 240, ${0.1 * glowPulse})`);
-      bgGrad.addColorStop(1, 'rgba(20, 10, 40, 0)');
-      ctx.fillStyle = bgGrad;
-      ctx.fillRect(0, 0, 700, 700);
+        // Character Palette (Colors)
+        const colors = {
+            skin: ['#fce4d6', '#f5d0ba', '#e8b595', '#d39b7c'],
+            hair: ['#2c3e50', '#e67e22', '#8e44ad', '#e74c3c', '#f1c40f', '#ffffff', '#34495e', '#a04000'],
+            eyes: ['#3498db', '#e74c3c', '#27ae60', '#f39c12', '#8e44ad', '#2c3e50'],
+            outfits: ['#e74c3c', '#3498db', '#2ecc71', '#9b59b6', '#f1c40f', '#e67e22'],
+            accessories: ['#c0392b', '#16a085', '#d35400']
+        };
 
-      // ----  floating hearts & sparkles (kawaii) ----
-      for (let i = 0; i < 22; i++) {
-        const seed = i * 2.1;
-        const x = 180 + Math.sin(time * 0.3 + i * 0.7) * 170 + Math.cos(i * 0.9) * 30;
-        const y = 150 + Math.cos(time * 0.35 + i * 0.9) * 160 + Math.sin(i * 0.6) * 25;
-        const size = 3 + Math.sin(time + i * 0.8) * 2.5;
-        const alpha = 0.2 + Math.sin(time * 0.6 + i) * 0.12;
+        function getRandom(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
 
-        // small heart shape
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.scale(0.3 + Math.abs(size) * 0.08, 0.3 + Math.abs(size) * 0.08);
-        ctx.beginPath();
-        ctx.moveTo(0, -6);
-        ctx.bezierCurveTo(-10, -12, -16, 0, 0, 10);
-        ctx.bezierCurveTo(16, 0, 10, -12, 0, -6);
-        ctx.fillStyle = `rgba(255, 180, 220, ${alpha * 0.8})`;
-        ctx.shadowColor = '#ffa8d0';
-        ctx.shadowBlur = 20;
-        ctx.fill();
-        ctx.restore();
-      }
+        function drawCharacter() {
+            // 1. Clear Canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // ----  MAIN CHARACTER  ----
-      ctx.save();
-      ctx.shadowBlur = 30;
-      ctx.shadowColor = '#b292f0';
+            // Random Selections
+            const skinColor = getRandom(colors.skin);
+            const hairColor = getRandom(colors.hair);
+            const eyeColor = getRandom(colors.eyes);
+            const outfitColor = getRandom(colors.outfits);
+            const accessoryColor = getRandom(colors.accessories);
+            const hairStyle = Math.floor(Math.random() * 3); // 0, 1, or 2
 
-      // ---  base hair (long, flowing, pastel purple/pink) ---
-      const hairGrad = ctx.createLinearGradient(200, 150, 500, 500);
-      hairGrad.addColorStop(0, '#b58cff');
-      hairGrad.addColorStop(0.4, '#8f6ad6');
-      hairGrad.addColorStop(0.8, '#533d8a');
-      hairGrad.addColorStop(1, '#2a1d52');
-      ctx.beginPath();
-      ctx.ellipse(350, 310, 160, 195, 0, 0, Math.PI * 2);
-      ctx.fillStyle = hairGrad;
-      ctx.fill();
+            // 2. Draw Body & Legs (Base)
+            ctx.fillStyle = skinColor;
+            ctx.fillRect(170, 240, 60, 120); // Torso
+            ctx.fillRect(175, 360, 20, 80);  // Left leg
+            ctx.fillRect(205, 360, 20, 80);  // Right leg
 
-      // ---  hair highlights & strands ---
-      ctx.shadowBlur = 25;
-      ctx.shadowColor = '#d9b0ff';
-      for (let i = 0; i < 16; i++) {
-        const angle = i * 0.8 + time * 0.06;
-        const rad = 145 + Math.sin(time * 0.4 + i) * 10;
-        const x = 350 + Math.cos(angle) * rad * 0.55;
-        const y = 290 + Math.sin(angle) * rad * 0.5;
-        ctx.beginPath();
-        ctx.moveTo(350 + Math.cos(angle-0.2) * 65, 285 + Math.sin(angle-0.2) * 55);
-        ctx.quadraticCurveTo(x, y-22, 350 + Math.cos(angle+0.4) * 75, 285 + Math.sin(angle+0.4) * 60);
-        ctx.strokeStyle = `rgba(210, 180, 255, ${0.4 + Math.sin(time + i*0.7)*0.15})`;
-        ctx.lineWidth = 5 + Math.sin(time*0.6 + i)*2;
-        ctx.stroke();
-      }
+            // 3. Draw Outfit (Dress/Shirt)
+            ctx.fillStyle = outfitColor;
+            ctx.beginPath();
+            ctx.moveTo(160, 250);
+            ctx.quadraticCurveTo(200, 230, 240, 250);
+            ctx.lineTo(230, 320);
+            ctx.quadraticCurveTo(200, 330, 170, 320);
+            ctx.closePath();
+            ctx.fill();
+            
+            // 4. Draw Head
+            ctx.fillStyle = skinColor;
+            ctx.beginPath();
+            ctx.ellipse(200, 140, 55, 65, 0, 0, Math.PI * 2);
+            ctx.fill();
 
-      // ---  face (soft, cute) ---
-      ctx.shadowBlur = 20;
-      ctx.shadowColor = '#b096e6';
-      ctx.beginPath();
-      ctx.ellipse(350, 325, 74, 85, 0, 0, Math.PI * 2);
-      ctx.fillStyle = '#fbefe6';
-      ctx.fill();
+            // 5. Draw Hair (Procedural based on random style)
+            ctx.fillStyle = hairColor;
+            if (hairStyle === 0) { // Long straight hair
+                ctx.beginPath();
+                ctx.ellipse(200, 130, 70, 80, 0, 0, Math.PI * 2);
+                ctx.fill();
+                // Bangs
+                ctx.fillRect(160, 130, 80, 40);
+                // Side locks
+                ctx.fillRect(140, 160, 20, 70);
+                ctx.fillRect(240, 160, 20, 70);
+            } else if (hairStyle === 1) { // Spiky/Short hair
+                ctx.beginPath();
+                ctx.moveTo(145, 140);
+                ctx.lineTo(160, 80);
+                ctx.lineTo(185, 115);
+                ctx.lineTo(200, 60);
+                ctx.lineTo(215, 115);
+                ctx.lineTo(240, 80);
+                ctx.lineTo(255, 140);
+                ctx.closePath();
+                ctx.fill();
+            } else { // Twin-tails
+                ctx.beginPath();
+                ctx.ellipse(200, 135, 50, 60, 0, 0, Math.PI * 2);
+                ctx.fill();
+                // Pigtails
+                ctx.beginPath();
+                ctx.ellipse(130, 210, 30, 60, 0.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(270, 210, 30, 60, -0.5, 0, Math.PI * 2);
+                ctx.fill();
+                // Bangs
+                ctx.fillRect(160, 130, 80, 40);
+            }
 
-      // ---  blush (pink, kawaii) ---
-      ctx.shadowBlur = 30;
-      ctx.shadowColor = '#ffa5b8';
-      ctx.beginPath();
-      ctx.ellipse(306, 348, 22, 12, -0.2, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255, 150, 180, ${0.3 + Math.sin(time*0.5)*0.08})`;
-      ctx.fill();
-      ctx.beginPath();
-      ctx.ellipse(394, 348, 22, 12, 0.2, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255, 150, 180, ${0.3 + Math.sin(time*0.5+0.8)*0.08})`;
-      ctx.fill();
+            // 6. Draw Eyes
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.ellipse(170, 150, 15, 12, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(230, 150, 15, 12, 0, 0, Math.PI * 2);
+            ctx.fill();
 
-      // ---  big anime eyes (purple/pink) ---
-      ctx.shadowBlur = 25;
-      ctx.shadowColor = '#a07cff';
-      // eye whites
-      ctx.beginPath();
-      ctx.ellipse(318, 308, 30, 34, 0, 0, Math.PI * 2);
-      ctx.fillStyle = '#faf7ff';
-      ctx.fill();
-      ctx.beginPath();
-      ctx.ellipse(382, 308, 30, 34, 0, 0, Math.PI * 2);
-      ctx.fillStyle = '#faf7ff';
-      ctx.fill();
+            // Eye Iris
+            ctx.fillStyle = eyeColor;
+            ctx.beginPath();
+            ctx.ellipse(175, 150, 8, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(225, 150, 8, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
 
-      // irises (gradient pastel)
-      for (let side = 0; side < 2; side++) {
-        const cx = side === 0 ? 318 : 382;
-        const gradIris = ctx.createRadialGradient(cx-4, 298, 5, cx, 304, 28);
-        gradIris.addColorStop(0, '#d9b8ff');
-        gradIris.addColorStop(0.5, '#a07ce0');
-        gradIris.addColorStop(1, '#4d3285');
-        ctx.beginPath();
-        ctx.ellipse(cx, 304, 24, 28, 0, 0, Math.PI * 2);
-        ctx.fillStyle = gradIris;
-        ctx.fill();
-        // pupil
-        ctx.shadowBlur = 20;
-        ctx.shadowColor = '#b7a0ff';
-        ctx.beginPath();
-        ctx.arc(cx-1, 306, 9, 0, Math.PI * 2);
-        ctx.fillStyle = '#191333';
-        ctx.fill();
-        // eye shine (sparkle)
-        ctx.shadowBlur = 30;
-        ctx.shadowColor = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(cx-12, 294, 7, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${0.85 + Math.sin(time*1.2)*0.1})`;
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(cx+9, 300, 3.5, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${0.6 + Math.sin(time*1.5+1.2)*0.15})`;
-        ctx.fill();
-      }
+            // Eye Highlights
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(178, 145, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(228, 145, 3, 0, Math.PI * 2);
+            ctx.fill();
 
-      // ---  eyebrows (soft, expressive) ---
-      ctx.shadowBlur = 8;
-      ctx.shadowColor = '#4a3578';
-      ctx.lineWidth = 3.5;
-      ctx.strokeStyle = '#3f2b66';
-      ctx.beginPath();
-      ctx.moveTo(290, 280);
-      ctx.quadraticCurveTo(308, 268, 338, 276);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(362, 276);
-      ctx.quadraticCurveTo(392, 268, 410, 280);
-      ctx.stroke();
+            // 7. Draw Mouth (Smile)
+            ctx.strokeStyle = '#d35400';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(200, 180, 15, 0, Math.PI);
+            ctx.stroke();
 
-      // ---  cute nose & mouth ---
-      ctx.shadowBlur = 5;
-      ctx.strokeStyle = '#dba5b8';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(350, 338);
-      ctx.quadraticCurveTo(346, 348, 350, 354);
-      ctx.stroke();
-      // mouth (small 'w' shape)
-      ctx.beginPath();
-      ctx.moveTo(338, 372);
-      ctx.quadraticCurveTo(345, 366, 350, 372);
-      ctx.quadraticCurveTo(355, 366, 362, 372);
-      ctx.strokeStyle = '#b85a78';
-      ctx.lineWidth = 2.5;
-      ctx.stroke();
+            // 8. Draw Accessory (Choker/Belt like the image)
+            ctx.fillStyle = accessoryColor;
+            ctx.fillRect(165, 180, 70, 10); // Choker
+            ctx.fillRect(170, 260, 60, 8);  // Belt
 
-      // ---  cat headphones (PASTEL VIBE) ---
-      ctx.shadowBlur = 35;
-      ctx.shadowColor = '#b28aff';
-      // headband
-      ctx.beginPath();
-      ctx.ellipse(350, 230, 120, 40, 0, 0, Math.PI * 2);
-      ctx.fillStyle = '#6a4f9e';
-      ctx.fill();
-      ctx.beginPath();
-      ctx.ellipse(350, 230, 110, 32, 0, 0, Math.PI * 2);
-      ctx.fillStyle = '#8b6ac7';
-      ctx.fill();
-      // left ear
-      ctx.beginPath();
-      ctx.moveTo(210, 210);
-      ctx.lineTo(230, 160);
-      ctx.lineTo(260, 200);
-      ctx.fillStyle = '#b28aff';
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(215, 208);
-      ctx.lineTo(230, 170);
-      ctx.lineTo(252, 200);
-      ctx.fillStyle = '#f0c8ff';
-      ctx.fill();
-      // right ear
-      ctx.beginPath();
-      ctx.moveTo(440, 210);
-      ctx.lineTo(470, 160);
-      ctx.lineTo(490, 200);
-      ctx.fillStyle = '#b28aff';
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(445, 208);
-      ctx.lineTo(470, 170);
-      ctx.lineTo(485, 200);
-      ctx.fillStyle = '#f0c8ff';
-      ctx.fill();
+            // Text
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('CUSTOM AVATAR', 130, 470);
+        }
 
-      // ---  outfit / collar (cute) ---
-      ctx.shadowBlur = 25;
-      ctx.shadowColor = '#7a60b0';
-      ctx.beginPath();
-      ctx.moveTo(275, 408);
-      ctx.lineTo(350, 455);
-      ctx.lineTo(425, 408);
-      ctx.fillStyle = '#32275a';
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(280, 410);
-      ctx.lineTo(350, 452);
-      ctx.lineTo(420, 410);
-      ctx.strokeStyle = `rgba(200, 170, 255, ${0.5 + Math.sin(time*0.4)*0.15})`;
-      ctx.lineWidth = 2.5;
-      ctx.stroke();
+        function generateCharacter() {
+            drawCharacter();
+        }
 
-      // ---  hair accessories (little ribbons) ---
-      for (let i = 0; i < 2; i++) {
-        const xOff = i === 0 ? -90 : 90;
-        const baseX = 350 + xOff;
-        const baseY = 195 + Math.sin(time * 0.7 + i * 1.5) * 10;
-        ctx.shadowBlur = 35;
-        ctx.shadowColor = '#e8c8ff';
-        ctx.beginPath();
-        ctx.moveTo(baseX-14, baseY-6);
-        ctx.quadraticCurveTo(baseX-32, baseY-34, baseX-10, baseY-44);
-        ctx.fillStyle = `rgba(230, 190, 255, ${0.7 + Math.sin(time + i)*0.2})`;
-        ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(baseX+14, baseY-6);
-        ctx.quadraticCurveTo(baseX+32, baseY-34, baseX+10, baseY-44);
-        ctx.fillStyle = `rgba(230, 190, 255, ${0.7 + Math.cos(time + i)*0.2})`;
-        ctx.fill();
-      }
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.download = 'anime_character.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
 
-      // ---  floating text / cute elements ---
-      ctx.shadowBlur = 30;
-      ctx.shadowColor = '#caacff';
-      ctx.font = 'bold 18px "Segoe UI", "Arial Unicode MS", sans-serif';
-      ctx.fillStyle = `rgba(235, 210, 255, ${0.35 + Math.sin(time*0.8)*0.12})`;
-      ctx.fillText('♡ kawaii ♡', 270, 120 + Math.sin(time*0.5)*6);
-      ctx.font = '14px sans-serif';
-      ctx.fillStyle = `rgba(220, 195, 255, ${0.3 + Math.sin(time*0.7+1)*0.1})`;
-      ctx.fillText('✧  pastel dream  ✧', 480, 580 + Math.sin(time*0.4)*5);
-
-      // ---  extra sparkles around character ---
-      for (let i = 0; i < 12; i++) {
-        const t = time * 0.6 + i * 0.9;
-        const x = 280 + Math.sin(t) * 120 + Math.cos(i * 1.1) * 35;
-        const y = 200 + Math.cos(t * 0.6) * 130 + Math.sin(i * 0.9) * 30;
-        ctx.shadowBlur = 30;
-        ctx.shadowColor = '#ffb0e8';
-        ctx.beginPath();
-        ctx.arc(x, y, 2.5 + Math.sin(t+2)*1.5, 0, Math.PI*2);
-        ctx.fillStyle = `rgba(255, 200, 240, ${0.3 + Math.sin(t+1.2)*0.12})`;
-        ctx.fill();
-      }
-
-      ctx.restore();
-
-      // ---  final eye catch (extra shine) ---
-      ctx.shadowBlur = 45;
-      ctx.shadowColor = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(336, 270, 3.5, 0, Math.PI*2);
-      ctx.fillStyle = `rgba(255, 255, 255, ${0.4 + Math.sin(time*1.6)*0.15})`;
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(372, 273, 2.5, 0, Math.PI*2);
-      ctx.fillStyle = `rgba(255, 255, 255, ${0.35 + Math.cos(time*1.3)*0.15})`;
-      ctx.fill();
-
-      // signature
-      ctx.shadowBlur = 8;
-      ctx.shadowColor = '#7b64b0';
-      ctx.fillStyle = '#b8a3e6';
-      ctx.font = '11px monospace';
-      ctx.fillText('✦ pastel anime · canvas ✦', 510, 670);
-    }
-
-    // ----  animation loop  ----
-    let startTime = performance.now() / 1000;
-    function animate() {
-      const now = performance.now() / 1000;
-      const elapsed = (now - startTime) * 0.6;
-      drawCharacter(elapsed);
-      requestAnimationFrame(animate);
-    }
-    animate();
-
-  })();
-</script>
+        // Initial Draw
+        generateCharacter();
+    </script>
 </body>
 </html>
