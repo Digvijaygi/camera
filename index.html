@@ -3,207 +3,378 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Anime Generator</title>
+    <title>Ultimate Realistic Anime Generator</title>
     <style>
         body {
-            background-color: #1a1a1a;
-            color: white;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
         }
         canvas {
-            background-color: #f4f4f9;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background: #f8f9fa; /* Clean white background */
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
             border-radius: 15px;
+            display: block;
+            margin: 0 auto;
+            width: 500px;
+            height: 600px;
         }
         .controls {
-            margin-top: 20px;
+            margin-top: 25px;
             display: flex;
-            gap: 15px;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
         button {
-            padding: 10px 20px;
+            padding: 12px 28px;
             font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
             border: none;
-            border-radius: 8px;
-            background-color: #ff6b6b;
+            border-radius: 50px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
             color: white;
-            font-weight: bold;
-            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(238, 90, 36, 0.4);
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
         }
         button:hover {
-            background-color: #ff4757;
-            transform: scale(1.05);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(238, 90, 36, 0.6);
         }
         button.secondary {
-            background-color: #2ed573;
+            background: linear-gradient(45deg, #00b894, #00cec9);
+            box-shadow: 0 4px 15px rgba(0, 206, 201, 0.4);
         }
         button.secondary:hover {
-            background-color: #26de81;
+            box-shadow: 0 8px 25px rgba(0, 206, 201, 0.6);
         }
     </style>
 </head>
 <body>
 
-    <h1>✨ Anime Avatar Generator</h1>
-    <canvas id="animeCanvas" width="400" height="500"></canvas>
-    
-    <div class="controls">
-        <button onclick="generateCharacter()">Generate New Character</button>
-        <button class="secondary" onclick="downloadImage()">Download as PNG</button>
+    <h1>✨ 3D-Like Anime Engine</h1>
+    <div class="container">
+        <canvas id="animeCanvas" width="500" height="600"></canvas>
+        
+        <div class="controls">
+            <button onclick="generateCharacter()">🔄 Generate Masterpiece</button>
+            <button class="secondary" onclick="downloadImage()">💾 Download HD PNG</button>
+        </div>
     </div>
 
     <script>
         const canvas = document.getElementById('animeCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Character Palette (Colors)
-        const colors = {
-            skin: ['#fce4d6', '#f5d0ba', '#e8b595', '#d39b7c'],
-            hair: ['#2c3e50', '#e67e22', '#8e44ad', '#e74c3c', '#f1c40f', '#ffffff', '#34495e', '#a04000'],
-            eyes: ['#3498db', '#e74c3c', '#27ae60', '#f39c12', '#8e44ad', '#2c3e50'],
-            outfits: ['#e74c3c', '#3498db', '#2ecc71', '#9b59b6', '#f1c40f', '#e67e22'],
-            accessories: ['#c0392b', '#16a085', '#d35400']
-        };
+        // --- 1. ADVANCED COLOR PALETTE WITH SHADOWS ---
+        const palettes = [
+            { skin: '#f5d0ba', skinShadow: '#e8b595', blush: '#f5a0a0', hair: '#2c3e50', hairLight: '#4b6584', eye: '#3498db', outfit: '#ff7675', outfitShadow: '#d63031' },
+            { skin: '#ffe0bd', skinShadow: '#f5cba7', blush: '#ffb3c6', hair: '#e67e22', hairLight: '#f39c12', eye: '#00b894', outfit: '#74b9ff', outfitShadow: '#0984e3' },
+            { skin: '#fce4d6', skinShadow: '#edd9c0', blush: '#ffb7b2', hair: '#f1c40f', hairLight: '#f9e79f', eye: '#6c5ce7', outfit: '#fd79a8', outfitShadow: '#e84393' },
+            { skin: '#e8b595', skinShadow: '#d39b7c', blush: '#e66767', hair: '#ffffff', hairLight: '#dfe6e9', eye: '#e17055', outfit: '#55efc4', outfitShadow: '#00b894' }
+        ];
 
-        function getRandom(arr) {
-            return arr[Math.floor(Math.random() * arr.length)];
+        let currentChar = {};
+
+        function getRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+        // --- 2. DRAWING UTILITIES (Gradients for realism) ---
+        function drawGradientEllipse(x, y, rx, ry, color1, color2, rotation = 0) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(rotation);
+            ctx.beginPath();
+            ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+            
+            let gradient = ctx.createRadialGradient(-rx * 0.3, -ry * 0.3, 0, 0, 0, rx);
+            gradient.addColorStop(0, color1);
+            gradient.addColorStop(1, color2);
+            
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            ctx.restore();
         }
 
-        function drawCharacter() {
-            // 1. Clear Canvas
+        function drawSoftShadow(x, y, w, h, color) {
+            ctx.fillStyle = color;
+            ctx.globalAlpha = 0.3;
+            ctx.beginPath();
+            ctx.ellipse(x, y, w, h, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1.0;
+        }
+
+        // --- 3. MAIN RENDERING ENGINE ---
+        function renderCharacter(palette) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Random Selections
-            const skinColor = getRandom(colors.skin);
-            const hairColor = getRandom(colors.hair);
-            const eyeColor = getRandom(colors.eyes);
-            const outfitColor = getRandom(colors.outfits);
-            const accessoryColor = getRandom(colors.accessories);
-            const hairStyle = Math.floor(Math.random() * 3); // 0, 1, or 2
+            const cx = 250; // Center X
+            const headY = 180; // Center Y of Head
 
-            // 2. Draw Body & Legs (Base)
-            ctx.fillStyle = skinColor;
-            ctx.fillRect(170, 240, 60, 120); // Torso
-            ctx.fillRect(175, 360, 20, 80);  // Left leg
-            ctx.fillRect(205, 360, 20, 80);  // Right leg
+            // --- LAYER 1: NECK & COLLARBONE SHADOW ---
+            drawGradientEllipse(cx, headY + 80, 45, 30, palette.skin, palette.skinShadow);
+            drawGradientEllipse(cx, headY + 95, 35, 15, palette.skin, palette.skinShadow);
 
-            // 3. Draw Outfit (Dress/Shirt)
-            ctx.fillStyle = outfitColor;
+            // --- LAYER 2: BODY & CLOTHING (With 3D Folds) ---
+            // Shirt
+            ctx.fillStyle = palette.outfit;
+            ctx.shadowColor = 'rgba(0,0,0,0.2)';
+            ctx.shadowBlur = 10;
             ctx.beginPath();
-            ctx.moveTo(160, 250);
-            ctx.quadraticCurveTo(200, 230, 240, 250);
-            ctx.lineTo(230, 320);
-            ctx.quadraticCurveTo(200, 330, 170, 320);
-            ctx.closePath();
+            ctx.ellipse(cx, headY + 220, 120, 140, 0, 0, Math.PI * 2);
             ctx.fill();
             
-            // 4. Draw Head
-            ctx.fillStyle = skinColor;
+            // Shirt Shadow (Folds)
+            ctx.fillStyle = palette.outfitShadow;
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 0.3;
             ctx.beginPath();
-            ctx.ellipse(200, 140, 55, 65, 0, 0, Math.PI * 2);
+            ctx.ellipse(cx - 30, headY + 240, 50, 80, 0.2, 0, Math.PI * 2);
             ctx.fill();
+            ctx.globalAlpha = 1;
+            ctx.shadowBlur = 0;
 
-            // 5. Draw Hair (Procedural based on random style)
-            ctx.fillStyle = hairColor;
-            if (hairStyle === 0) { // Long straight hair
-                ctx.beginPath();
-                ctx.ellipse(200, 130, 70, 80, 0, 0, Math.PI * 2);
-                ctx.fill();
-                // Bangs
-                ctx.fillRect(160, 130, 80, 40);
-                // Side locks
-                ctx.fillRect(140, 160, 20, 70);
-                ctx.fillRect(240, 160, 20, 70);
-            } else if (hairStyle === 1) { // Spiky/Short hair
-                ctx.beginPath();
-                ctx.moveTo(145, 140);
-                ctx.lineTo(160, 80);
-                ctx.lineTo(185, 115);
-                ctx.lineTo(200, 60);
-                ctx.lineTo(215, 115);
-                ctx.lineTo(240, 80);
-                ctx.lineTo(255, 140);
-                ctx.closePath();
-                ctx.fill();
-            } else { // Twin-tails
-                ctx.beginPath();
-                ctx.ellipse(200, 135, 50, 60, 0, 0, Math.PI * 2);
-                ctx.fill();
-                // Pigtails
-                ctx.beginPath();
-                ctx.ellipse(130, 210, 30, 60, 0.5, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.ellipse(270, 210, 30, 60, -0.5, 0, Math.PI * 2);
-                ctx.fill();
-                // Bangs
-                ctx.fillRect(160, 130, 80, 40);
-            }
+            // --- LAYER 3: HEAD & FACE SHAPE ---
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = 'rgba(0,0,0,0.15)';
+            drawGradientEllipse(cx, headY, 90, 100, palette.skin, palette.skinShadow);
+            
+            // Chin highlight
+            drawGradientEllipse(cx, headY + 30, 50, 40, '#ffffff', palette.skin);
+            ctx.shadowBlur = 0;
 
-            // 6. Draw Eyes
-            ctx.fillStyle = 'white';
-            ctx.beginPath();
-            ctx.ellipse(170, 150, 15, 12, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.ellipse(230, 150, 15, 12, 0, 0, Math.PI * 2);
-            ctx.fill();
+            // --- LAYER 4: BLUSH (Cheeks) ---
+            drawSoftShadow(cx - 55, headY + 20, 25, 15, palette.blush);
+            drawSoftShadow(cx + 55, headY + 20, 25, 15, palette.blush);
 
-            // Eye Iris
-            ctx.fillStyle = eyeColor;
+            // --- LAYER 5: EYEBROWS ---
+            ctx.strokeStyle = palette.hair;
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            // Left
             ctx.beginPath();
-            ctx.ellipse(175, 150, 8, 8, 0, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.moveTo(cx - 60, headY - 20);
+            ctx.quadraticCurveTo(cx - 35, headY - 35, cx - 20, headY - 20);
+            ctx.stroke();
+            // Right
             ctx.beginPath();
-            ctx.ellipse(225, 150, 8, 8, 0, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Eye Highlights
-            ctx.fillStyle = 'white';
-            ctx.beginPath();
-            ctx.arc(178, 145, 3, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(228, 145, 3, 0, Math.PI * 2);
-            ctx.fill();
-
-            // 7. Draw Mouth (Smile)
-            ctx.strokeStyle = '#d35400';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(200, 180, 15, 0, Math.PI);
+            ctx.moveTo(cx + 60, headY - 20);
+            ctx.quadraticCurveTo(cx + 35, headY - 35, cx + 20, headY - 20);
             ctx.stroke();
 
-            // 8. Draw Accessory (Choker/Belt like the image)
-            ctx.fillStyle = accessoryColor;
-            ctx.fillRect(165, 180, 70, 10); // Choker
-            ctx.fillRect(170, 260, 60, 8);  // Belt
+            // --- LAYER 6: ULTRA REALISTIC EYES (The soul of anime) ---
+            const eyeY = headY + 15;
+            
+            // Eye Whites
+            ctx.fillStyle = '#fdfbf7';
+            ctx.shadowBlur = 5;
+            ctx.shadowColor = 'rgba(0,0,0,0.2)';
+            ctx.beginPath();
+            ctx.ellipse(cx - 30, eyeY, 25, 30, -0.1, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(cx + 30, eyeY, 25, 30, 0.1, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
 
-            // Text
-            ctx.fillStyle = '#333';
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText('CUSTOM AVATAR', 130, 470);
+            // Iris (With radial gradient for depth)
+            for(let eyeX of [cx - 30, cx + 30]) {
+                // Outer Ring
+                ctx.beginPath();
+                let grad = ctx.createRadialGradient(eyeX + 5, eyeY + 5, 0, eyeX, eyeY, 22);
+                grad.addColorStop(0, '#ffffff');
+                grad.addColorStop(0.3, palette.eye);
+                grad.addColorStop(1, '#2c3e50'); // Dark rim
+                ctx.fillStyle = grad;
+                ctx.ellipse(eyeX, eyeY, 20, 20, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Pupil
+                ctx.fillStyle = '#1a1a2e';
+                ctx.beginPath();
+                ctx.ellipse(eyeX, eyeY + 4, 7, 10, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Specular Highlight 1 (Main Light)
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.ellipse(eyeX - 8, eyeY - 6, 5, 8, -0.3, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Specular Highlight 2 (Secondary bounce light)
+                ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                ctx.beginPath();
+                ctx.ellipse(eyeX + 5, eyeY + 10, 3, 4, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Eyelashes (Top)
+            ctx.strokeStyle = '#2c3e50';
+            ctx.lineWidth = 3;
+            for(let eyeX of [cx - 30, cx + 30]) {
+                for(let i = -10; i <= 10; i+=5) {
+                    ctx.beginPath();
+                    ctx.moveTo(eyeX + i, eyeY - 28);
+                    ctx.lineTo(eyeX + i - 4, eyeY - 35);
+                    ctx.stroke();
+                }
+            }
+
+            // --- LAYER 7: MOUTH & NOSE ---
+            // Nose hint
+            ctx.fillStyle = palette.skinShadow;
+            ctx.beginPath();
+            ctx.ellipse(cx - 5, headY + 45, 4, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(cx + 5, headY + 45, 4, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Mouth (Soft Gradient)
+            ctx.fillStyle = '#e74c3c';
+            ctx.globalAlpha = 0.7;
+            ctx.beginPath();
+            ctx.ellipse(cx, headY + 60, 18, 9, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1.0;
+            ctx.fillStyle = '#c0392b'; // Inner mouth
+            ctx.beginPath();
+            ctx.ellipse(cx, headY + 63, 12, 5, 0, 0, Math.PI);
+            ctx.fill();
+
+            // Lip highlight
+            ctx.fillStyle = '#fdfbf7';
+            ctx.globalAlpha = 0.5;
+            ctx.beginPath();
+            ctx.ellipse(cx - 6, headY + 55, 5, 3, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1.0;
+
+            // --- LAYER 8: HAIR (Complex multi-layered) ---
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = 'rgba(0,0,0,0.3)';
+            
+            // Back hair
+            ctx.fillStyle = palette.hairShadow || palette.hair;
+            ctx.beginPath();
+            ctx.ellipse(cx, headY - 10, 95, 105, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Main Hair
+            ctx.fillStyle = palette.hair;
+            ctx.beginPath();
+            ctx.ellipse(cx, headY - 10, 85, 95, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Side Locks (Flowing)
+            ctx.beginPath();
+            ctx.moveTo(cx - 85, headY - 20);
+            ctx.quadraticCurveTo(cx - 120, headY + 20, cx - 100, headY + 80);
+            ctx.lineTo(cx - 80, headY + 60);
+            ctx.quadraticCurveTo(cx - 90, headY + 10, cx - 60, headY - 10);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(cx + 85, headY - 20);
+            ctx.quadraticCurveTo(cx + 120, headY + 20, cx + 100, headY + 80);
+            ctx.lineTo(cx + 80, headY + 60);
+            ctx.quadraticCurveTo(cx + 90, headY + 10, cx + 60, headY - 10);
+            ctx.fill();
+
+            // Bangs (Front)
+            ctx.fillStyle = palette.hairLight;
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+            ctx.moveTo(cx - 70, headY - 60);
+            ctx.quadraticCurveTo(cx - 20, headY - 80, cx, headY - 50);
+            ctx.quadraticCurveTo(cx, headY - 30, cx - 20, headY - 15);
+            ctx.quadraticCurveTo(cx - 40, headY - 40, cx - 70, headY - 60);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.moveTo(cx, headY - 50);
+            ctx.quadraticCurveTo(cx + 20, headY - 80, cx + 70, headY - 60);
+            ctx.quadraticCurveTo(cx + 40, headY - 40, cx + 20, headY - 15);
+            ctx.quadraticCurveTo(cx, headY - 30, cx, headY - 50);
+            ctx.fill();
+
+            ctx.shadowBlur = 0;
+
+            // --- LAYER 9: ACCESSORIES (Like the image) ---
+            // Choker
+            ctx.fillStyle = '#2c3e50';
+            ctx.shadowBlur = 10;
+            ctx.fillRect(cx - 45, headY + 70, 90, 12);
+            
+            // Gold Ring on Choker
+            ctx.fillStyle = '#f1c40f';
+            ctx.shadowBlur = 5;
+            ctx.shadowColor = 'rgba(241, 196, 15, 0.5)';
+            ctx.beginPath();
+            ctx.ellipse(cx, headY + 76, 8, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#d4ac0d';
+            ctx.beginPath();
+            ctx.ellipse(cx, headY + 76, 5, 5, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Belt (Lower)
+            ctx.fillStyle = '#2c3e50';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = 'rgba(0,0,0,0.3)';
+            ctx.fillRect(cx - 60, headY + 170, 120, 15);
+            
+            // Belt Buckle
+            ctx.fillStyle = '#f1c40f';
+            ctx.shadowBlur = 5;
+            ctx.fillRect(cx - 15, headY + 167, 30, 21);
+            ctx.fillStyle = '#d4ac0d';
+            ctx.fillRect(cx - 5, headY + 172, 10, 11);
+            
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'transparent';
+
+            // --- LAYER 10: GLOWING EFFECTS ---
+            // Add a soft glow around the character
+            ctx.shadowBlur = 60;
+            ctx.shadowColor = 'rgba(255, 255, 255, 0.1)';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0)';
+            ctx.beginPath();
+            ctx.arc(cx, headY, 150, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
         }
 
+        // --- 4. GENERATE AND SAVE FUNCTIONS ---
         function generateCharacter() {
-            drawCharacter();
+            currentChar = getRandom(palettes);
+            renderCharacter(currentChar);
         }
 
         function downloadImage() {
             const link = document.createElement('a');
-            link.download = 'anime_character.png';
-            link.href = canvas.toDataURL();
+            link.download = 'Anime_Masterpiece.png';
+            link.href = canvas.toDataURL('image/png');
             link.click();
         }
 
-        // Initial Draw
+        // Initial Render
         generateCharacter();
     </script>
 </body>
