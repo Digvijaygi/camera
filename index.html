@@ -3,493 +3,721 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anime Girl - Pure HTML5 Canvas</title>
+    <title>Pure Canvas Anime Girl</title>
     <style>
         body {
-            margin: 0;
-            padding: 0;
+            background-color: #f0f0f0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: #f0f0f0;
-            overflow: hidden;
+            margin: 0;
         }
         canvas {
             background-color: #ffffff;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 8px;
         }
     </style>
 </head>
 <body>
 
-<canvas id="canvas"></canvas>
+<canvas id="myCanvas" width="800" height="1200"></canvas>
 
 <script>
-    const canvas = document.getElementById('canvas');
+    const canvas = document.getElementById('myCanvas');
     const ctx = canvas.getContext('2d');
-    
-    // Canvas Setup
-    canvas.width = 800;
-    canvas.height = 1000;
 
-    // Animation State
-    let walkCycle = 0;
-    const amplitude = 15; // Movement swing amplitude
+    // ==========================================
+    // Helper Functions & Gradients
+    // ==========================================
+    function drawCircle(x, y, radius, color) {
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
 
-    function drawAnimeGirl(x, y, scale, offset) {
+    function drawEllipse(x, y, rx, ry, color) {
+        ctx.beginPath();
+        ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
+    // ==========================================
+    // 1. Shadow
+    // ==========================================
+    function drawShadow() {
+        // Main ground shadow
+        let grad = ctx.createRadialGradient(400, 950, 50, 400, 930, 180);
+        grad.addColorStop(0, 'rgba(0, 0, 0, 0.15)');
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.beginPath();
+        ctx.ellipse(400, 930, 180, 50, 0, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+    }
+
+    // ==========================================
+    // 2. Legs & Feet (Behind shorts)
+    // ==========================================
+    function drawLegs() {
+        // Skin base gradients
+        let skinGrad = ctx.createLinearGradient(300, 600, 500, 900);
+        skinGrad.addColorStop(0, '#FFE4D6');
+        skinGrad.addColorStop(0.5, '#FAD6C4');
+        skinGrad.addColorStop(1, '#E5C0AE');
+
+        // LEFT LEG (Straight, weight-bearing)
         ctx.save();
-        ctx.translate(x, y);
-        ctx.scale(scale, scale);
-
-        // --- 1. SHADOW ---
         ctx.beginPath();
-        ctx.ellipse(0, 480, 100, 20, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
-        ctx.fill();
-
-        // --- 2. LEFT LEG (Behind) ---
-        ctx.save();
-        ctx.translate(-30, 320);
-        ctx.rotate(-0.15 + Math.sin(offset) * 0.1);
-        // Thigh
-        ctx.beginPath();
-        ctx.moveTo(-15, 0);
-        ctx.quadraticCurveTo(-10, 60, 0, 90);
-        ctx.quadraticCurveTo(10, 60, 15, 0);
+        ctx.moveTo(345, 590);
+        ctx.quadraticCurveTo(380, 740, 365, 870); // Thigh to ankle
+        ctx.lineTo(395, 870);
+        ctx.quadraticCurveTo(400, 740, 415, 590); 
         ctx.closePath();
-        ctx.fillStyle = "#fce4d6";
+        ctx.fillStyle = skinGrad;
         ctx.fill();
-        ctx.strokeStyle = "#e6c2a5";
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        // Calf
+
+        // Left Leg Detail/Shading
         ctx.beginPath();
-        ctx.moveTo(-10, 80);
-        ctx.quadraticCurveTo(-18, 120, -20, 160);
-        ctx.quadraticCurveTo(18, 120, 10, 80);
-        ctx.closePath();
+        ctx.moveTo(400, 600);
+        ctx.quadraticCurveTo(410, 750, 390, 860);
+        ctx.lineTo(380, 860);
+        ctx.quadraticCurveTo(380, 750, 380, 600);
+        ctx.fillStyle = 'rgba(200, 150, 130, 0.2)';
         ctx.fill();
-        ctx.stroke();
+
+        // RIGHT LEG (Bent, stepped back)
+        ctx.beginPath();
+        ctx.moveTo(435, 590);
+        ctx.quadraticCurveTo(490, 680, 540, 770); // Thigh going down
+        ctx.quadraticCurveTo(555, 790, 560, 830); // Ankle
+        ctx.lineTo(530, 830);
+        ctx.quadraticCurveTo(515, 790, 465, 690); 
+        ctx.quadraticCurveTo(450, 650, 455, 590);
+        ctx.closePath();
+        ctx.fillStyle = skinGrad;
+        ctx.fill();
+
+        // Right Leg knee & shin shading
+        ctx.beginPath();
+        ctx.moveTo(470, 640);
+        ctx.quadraticCurveTo(510, 700, 540, 780);
+        ctx.lineTo(545, 780);
+        ctx.quadraticCurveTo(510, 700, 490, 640);
+        ctx.fillStyle = 'rgba(200, 150, 130, 0.2)';
+        ctx.fill();
         ctx.restore();
+    }
 
-        // --- 3. LEFT SHOE (Behind) ---
+    // ==========================================
+    // 3. Shoes (Navy Blue Sneakers)
+    // ==========================================
+    function drawShoes() {
+        // LEFT SHOE
         ctx.save();
-        ctx.translate(-45, 470);
-        ctx.rotate(0.2 + Math.sin(offset + 1) * 0.1);
         // Sole
         ctx.beginPath();
-        ctx.moveTo(-25, 0);
-        ctx.quadraticCurveTo(-30, 15, -15, 25);
-        ctx.quadraticCurveTo(15, 25, 25, 15);
-        ctx.quadraticCurveTo(30, 0, 25, -5);
-        ctx.closePath();
-        ctx.fillStyle = "#2c3e50";
+        ctx.ellipse(380, 880, 30, 15, -0.1, 0, Math.PI * 2);
+        ctx.fillStyle = '#e0e0e0';
         ctx.fill();
-        // Shoe lace area
-        ctx.beginPath();
-        ctx.ellipse(0, -8, 18, 12, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "#ecf0f1";
-        ctx.fill();
-        // Laces
-        for(let i=-10; i<=10; i+=5){
-            ctx.beginPath();
-            ctx.moveTo(i, -12);
-            ctx.lineTo(i+3, -4);
-            ctx.strokeStyle = "#7f8c8d";
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-        }
-        ctx.restore();
-
-        // --- 4. BODY & SKIN (TORSO) ---
-        ctx.save();
-        ctx.translate(0, 150);
-        ctx.beginPath();
-        ctx.moveTo(-40, 0);
-        ctx.quadraticCurveTo(-35, 60, -45, 140);
-        ctx.quadraticCurveTo(0, 160, 45, 140);
-        ctx.quadraticCurveTo(35, 60, 40, 0);
-        ctx.closePath();
-        ctx.fillStyle = "#fce4d6";
-        ctx.fill();
-        ctx.strokeStyle = "#e6c2a5";
-        ctx.lineWidth = 1;
-        ctx.stroke();
-
-        // --- 5. RIGHT ARM (Behind, due to angle) ---
-        ctx.save();
-        ctx.translate(35, 20);
-        ctx.rotate(-0.3);
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.quadraticCurveTo(25, 40, 30, 100);
-        ctx.quadraticCurveTo(10, 110, 0, 80);
-        ctx.closePath();
-        ctx.fillStyle = "#fce4d6";
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-
-        // --- 6. PINK SHIRT (Front) ---
-        ctx.save();
-        ctx.translate(0, 150);
-        // Left side frill
-        ctx.beginPath();
-        ctx.moveTo(-40, 10);
-        ctx.quadraticCurveTo(-60, 50, -55, 110);
-        ctx.quadraticCurveTo(-30, 130, 0, 120);
-        ctx.quadraticCurveTo(-15, 80, -40, 10);
-        ctx.fillStyle = "#f8bbd0";
-        ctx.fill();
-        ctx.strokeStyle = "#f48fb1";
-        ctx.lineWidth = 1;
-        ctx.stroke();
-
-        // Right side frill
-        ctx.beginPath();
-        ctx.moveTo(40, 10);
-        ctx.quadraticCurveTo(60, 50, 55, 110);
-        ctx.quadraticCurveTo(30, 130, 0, 120);
-        ctx.quadraticCurveTo(15, 80, 40, 10);
-        ctx.fillStyle = "#f48fb1"; // Darker for depth
-        ctx.fill();
-        ctx.stroke();
-
-        // Shirt Front Panel
-        ctx.beginPath();
-        ctx.moveTo(-35, 5);
-        ctx.quadraticCurveTo(-30, 60, -35, 100);
-        ctx.quadraticCurveTo(0, 110, 35, 100);
-        ctx.quadraticCurveTo(30, 60, 35, 5);
-        ctx.closePath();
-        ctx.fillStyle = "#f06292";
-        ctx.fill();
-        ctx.stroke();
-        
-        // Chest Bow
-        ctx.beginPath();
-        ctx.moveTo(0, 30);
-        ctx.quadraticCurveTo(-30, 15, -25, 45);
-        ctx.quadraticCurveTo(0, 40, 0, 30);
-        ctx.fillStyle = "#e91e63";
-        ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(0, 30);
-        ctx.quadraticCurveTo(30, 15, 25, 45);
-        ctx.quadraticCurveTo(0, 40, 0, 30);
-        ctx.fill();
-        ctx.restore();
-
-        // --- 7. BELT & SHORTS ---
-        ctx.save();
-        ctx.translate(0, 270);
-        // White Shorts
-        ctx.beginPath();
-        ctx.moveTo(-30, 0);
-        ctx.quadraticCurveTo(-40, 30, -35, 45);
-        ctx.quadraticCurveTo(-10, 55, 0, 50);
-        ctx.quadraticCurveTo(10, 55, 35, 45);
-        ctx.quadraticCurveTo(40, 30, 30, 0);
-        ctx.closePath();
-        ctx.fillStyle = "#ffffff";
-        ctx.fill();
-        ctx.strokeStyle = "#bdc3c7";
+        ctx.strokeStyle = '#b0b0b0';
         ctx.lineWidth = 1.5;
         ctx.stroke();
 
-        // Frills on Shorts (Lace effect)
-        for(let i=-25; i<=25; i+=8) {
-            ctx.beginPath();
-            ctx.arc(i, 46, 5, 0, Math.PI);
-            ctx.fillStyle = "#ecf0f1";
-            ctx.fill();
-            ctx.stroke();
-        }
-
-        // Brown Belt
+        // Shoe body
         ctx.beginPath();
-        ctx.moveTo(-32, 5);
-        ctx.lineTo(32, 5);
-        ctx.strokeStyle = "#795548";
-        ctx.lineWidth = 6;
-        ctx.stroke();
-        // Belt Buckle
-        ctx.fillStyle = "#f1c40f";
-        ctx.strokeStyle = "#d4ac0d";
+        ctx.moveTo(350, 865);
+        ctx.quadraticCurveTo(340, 850, 360, 840);
+        ctx.quadraticCurveTo(380, 835, 400, 850);
+        ctx.quadraticCurveTo(410, 860, 410, 880);
+        ctx.quadraticCurveTo(390, 885, 350, 865);
+        ctx.fillStyle = '#1A237E'; // Dark navy
+        ctx.fill();
+        // Shoe toe
+        ctx.beginPath();
+        ctx.ellipse(360, 880, 20, 10, 0.1, 0, Math.PI * 2);
+        ctx.fillStyle = '#283593';
+        ctx.fill();
+
+        // Laces
+        ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 2;
-        ctx.fillRect(-10, 1, 20, 8);
-        ctx.strokeRect(-10, 1, 20, 8);
-        ctx.restore();
-
-        // --- 8. RIGHT LEG (Front) ---
-        ctx.save();
-        ctx.translate(30, 320);
-        ctx.rotate(0.15 - Math.sin(offset) * 0.1);
-        // Thigh
-        ctx.beginPath();
-        ctx.moveTo(-15, 0);
-        ctx.quadraticCurveTo(10, 60, 15, 90);
-        ctx.quadraticCurveTo(-10, 60, -15, 0);
-        ctx.closePath();
-        ctx.fillStyle = "#fce4d6";
-        ctx.fill();
-        ctx.stroke();
-        // Calf
-        ctx.beginPath();
-        ctx.moveTo(10, 80);
-        ctx.quadraticCurveTo(25, 120, 20, 160);
-        ctx.quadraticCurveTo(-15, 120, -10, 80);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-
-        // --- 9. RIGHT SHOE (Front) ---
-        ctx.save();
-        ctx.translate(40, 470);
-        ctx.rotate(-0.2 - Math.sin(offset + 1) * 0.1);
-        ctx.beginPath();
-        ctx.moveTo(15, 0);
-        ctx.quadraticCurveTo(25, 15, 15, 25);
-        ctx.quadraticCurveTo(-15, 25, -25, 15);
-        ctx.quadraticCurveTo(-30, 0, -20, -5);
-        ctx.closePath();
-        ctx.fillStyle = "#2c3e50";
-        ctx.fill();
-        ctx.strokeStyle = "#1a252f";
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.ellipse(0, -8, 18, 12, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "#ecf0f1";
-        ctx.fill();
-        for(let i=-10; i<=10; i+=5){
+        for(let i=0; i<3; i++) {
+            let y = 845 + i * 10;
             ctx.beginPath();
-            ctx.moveTo(i, -12);
-            ctx.lineTo(i+3, -4);
-            ctx.strokeStyle = "#7f8c8d";
-            ctx.lineWidth = 1.5;
+            ctx.moveTo(365, y);
+            ctx.lineTo(390, y - 5);
+            ctx.stroke();
+        }
+        // Tongue
+        ctx.beginPath();
+        ctx.moveTo(370, 840);
+        ctx.quadraticCurveTo(375, 830, 385, 835);
+        ctx.fillStyle = '#3F51B5';
+        ctx.fill();
+        ctx.restore();
+
+        // RIGHT SHOE
+        ctx.save();
+        // Sole
+        ctx.beginPath();
+        ctx.ellipse(545, 840, 30, 15, 0.2, 0, Math.PI * 2);
+        ctx.fillStyle = '#e0e0e0';
+        ctx.fill();
+        ctx.strokeStyle = '#b0b0b0';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Shoe body
+        ctx.beginPath();
+        ctx.moveTo(520, 825);
+        ctx.quadraticCurveTo(510, 810, 530, 800);
+        ctx.quadraticCurveTo(550, 795, 570, 810);
+        ctx.quadraticCurveTo(580, 820, 575, 840);
+        ctx.quadraticCurveTo(555, 845, 520, 825);
+        ctx.fillStyle = '#1A237E';
+        ctx.fill();
+        // Shoe toe
+        ctx.beginPath();
+        ctx.ellipse(530, 840, 20, 10, -0.1, 0, Math.PI * 2);
+        ctx.fillStyle = '#283593';
+        ctx.fill();
+
+        // Laces
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        for(let i=0; i<3; i++) {
+            let y = 805 + i * 10;
+            ctx.beginPath();
+            ctx.moveTo(535, y);
+            ctx.lineTo(560, y - 5);
+            ctx.stroke();
+        }
+        // Tongue
+        ctx.beginPath();
+        ctx.moveTo(540, 800);
+        ctx.quadraticCurveTo(545, 790, 555, 795);
+        ctx.fillStyle = '#3F51B5';
+        ctx.fill();
+        ctx.restore();
+    }
+
+    // ==========================================
+    // 4. Shorts & Straps
+    // ==========================================
+    function drawShorts() {
+        ctx.save();
+        // Main shorts body
+        let shortsGrad = ctx.createLinearGradient(320, 550, 480, 620);
+        shortsGrad.addColorStop(0, '#ffffff');
+        shortsGrad.addColorStop(1, '#e0e0e0');
+        
+        ctx.beginPath();
+        ctx.moveTo(330, 560);
+        ctx.quadraticCurveTo(400, 550, 470, 560); // Waistband
+        ctx.quadraticCurveTo(475, 590, 460, 610); // Right hip
+        ctx.quadraticCurveTo(425, 620, 380, 620); // Crotch
+        ctx.quadraticCurveTo(330, 615, 320, 600); // Left hip
+        ctx.quadraticCurveTo(320, 580, 330, 560);
+        ctx.closePath();
+        ctx.fillStyle = shortsGrad;
+        ctx.fill();
+        ctx.strokeStyle = '#cccccc';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Ruffles at the hem
+        ctx.fillStyle = '#ffffff';
+        let rX = [335, 360, 390, 420, 450, 460];
+        let rY = [605, 615, 620, 615, 605, 595];
+        for(let i=0; i<rX.length; i++) {
+            ctx.beginPath();
+            ctx.ellipse(rX[i], rY[i], 15, 8, 0.1, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#eeeeee';
+            ctx.lineWidth = 1;
             ctx.stroke();
         }
         ctx.restore();
 
-        // --- 10. HEAD & FACE ---
+        // Straps (Dangling from shorts)
         ctx.save();
-        ctx.translate(0, -50);
-        // Neck
+        // Left Strap (Brown)
         ctx.beginPath();
-        ctx.rect(-12, 170, 24, 25);
-        ctx.fillStyle = "#fce4d6";
+        ctx.moveTo(335, 570);
+        ctx.quadraticCurveTo(280, 570, 270, 600);
+        ctx.quadraticCurveTo(260, 620, 280, 630);
+        ctx.quadraticCurveTo(275, 605, 310, 590);
+        ctx.quadraticCurveTo(330, 585, 345, 575);
+        ctx.closePath();
+        ctx.fillStyle = '#5D4037';
+        ctx.fill();
+        // Left Strap (Blue)
+        ctx.beginPath();
+        ctx.moveTo(345, 575);
+        ctx.quadraticCurveTo(360, 590, 375, 600);
+        ctx.quadraticCurveTo(340, 595, 330, 580);
+        ctx.closePath();
+        ctx.fillStyle = '#607D8B';
         ctx.fill();
 
-        // Head Shape
+        // Right Strap (Brown)
         ctx.beginPath();
-        ctx.moveTo(-40, 140);
-        ctx.quadraticCurveTo(-55, 80, -30, 30);
-        ctx.quadraticCurveTo(-20, 10, 0, 5);
-        ctx.quadraticCurveTo(20, 10, 30, 30);
-        ctx.quadraticCurveTo(55, 80, 40, 140);
+        ctx.moveTo(460, 565);
+        ctx.quadraticCurveTo(500, 570, 520, 600);
+        ctx.quadraticCurveTo(530, 620, 510, 630);
+        ctx.quadraticCurveTo(515, 605, 485, 590);
+        ctx.quadraticCurveTo(465, 580, 450, 570);
         ctx.closePath();
-        ctx.fillStyle = "#fce4d6";
+        ctx.fillStyle = '#5D4037';
         ctx.fill();
-        ctx.strokeStyle = "#e6c2a5";
+        // Right Strap (Blue)
+        ctx.beginPath();
+        ctx.moveTo(450, 570);
+        ctx.quadraticCurveTo(440, 585, 420, 600);
+        ctx.quadraticCurveTo(455, 595, 465, 580);
+        ctx.closePath();
+        ctx.fillStyle = '#607D8B';
+        ctx.fill();
+        ctx.restore();
+    }
+
+    // ==========================================
+    // 5. Torso, Top, & Arms
+    // ==========================================
+    function drawTorsoAndArms() {
+        // SKIN: Arms and Neck
+        let skinGradArm = ctx.createLinearGradient(200, 400, 600, 600);
+        skinGradArm.addColorStop(0, '#FFE4D6');
+        skinGradArm.addColorStop(1, '#FAD6C4');
+
+        // Left Arm (Extended downward)
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(310, 410);
+        ctx.quadraticCurveTo(250, 480, 225, 540);
+        ctx.quadraticCurveTo(240, 560, 270, 550);
+        ctx.quadraticCurveTo(290, 480, 340, 430);
+        ctx.closePath();
+        ctx.fillStyle = skinGradArm;
+        ctx.fill();
+        // Left Hand (Open)
+        ctx.beginPath();
+        ctx.moveTo(230, 540);
+        ctx.quadraticCurveTo(210, 550, 195, 555);
+        ctx.quadraticCurveTo(190, 560, 200, 555);
+        ctx.quadraticCurveTo(205, 555, 215, 550);
+        ctx.quadraticCurveTo(220, 560, 225, 565);
+        ctx.quadraticCurveTo(230, 565, 235, 555);
+        ctx.closePath();
+        ctx.fillStyle = skinGradArm;
+        ctx.fill();
+        ctx.restore();
+
+        // Right Arm (Bent)
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(490, 410);
+        ctx.quadraticCurveTo(540, 430, 570, 470);
+        ctx.quadraticCurveTo(560, 480, 540, 475);
+        ctx.quadraticCurveTo(510, 440, 480, 430);
+        ctx.closePath();
+        ctx.fillStyle = skinGradArm;
+        ctx.fill();
+        // Right Hand (Holding straps)
+        ctx.beginPath();
+        ctx.moveTo(565, 470);
+        ctx.quadraticCurveTo(580, 480, 590, 500);
+        ctx.quadraticCurveTo(585, 505, 575, 495);
+        ctx.quadraticCurveTo(565, 485, 555, 475);
+        ctx.closePath();
+        ctx.fillStyle = skinGradArm;
+        ctx.fill();
+        ctx.restore();
+
+        // NECK & COLLARBONE
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(360, 380);
+        ctx.quadraticCurveTo(400, 390, 440, 380);
+        ctx.quadraticCurveTo(430, 410, 400, 410);
+        ctx.quadraticCurveTo(370, 410, 360, 380);
+        ctx.closePath();
+        ctx.fillStyle = skinGradArm;
+        ctx.fill();
+        ctx.restore();
+
+        // CHOKER
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(365, 375);
+        ctx.quadraticCurveTo(400, 385, 435, 375);
+        ctx.quadraticCurveTo(430, 390, 400, 392);
+        ctx.quadraticCurveTo(370, 392, 365, 375);
+        ctx.closePath();
+        ctx.fillStyle = '#1A237E'; // Dark Navy
+        ctx.fill();
+        ctx.restore();
+
+        // PINK TOP (Blouse)
+        ctx.save();
+        let topGrad = ctx.createLinearGradient(300, 380, 500, 550);
+        topGrad.addColorStop(0, '#F8BBD0');
+        topGrad.addColorStop(0.3, '#F06292');
+        topGrad.addColorStop(1, '#EC407A');
+
+        ctx.beginPath();
+        ctx.moveTo(320, 410);
+        // Left shoulder and chest
+        ctx.quadraticCurveTo(300, 450, 310, 500);
+        // Waist / Flared bottom
+        ctx.quadraticCurveTo(330, 560, 380, 560);
+        ctx.quadraticCurveTo(400, 565, 420, 560);
+        // Right chest and shoulder
+        ctx.quadraticCurveTo(470, 560, 490, 500);
+        ctx.quadraticCurveTo(500, 450, 480, 410);
+        // Collar / V-Neck
+        ctx.quadraticCurveTo(440, 440, 400, 460);
+        ctx.quadraticCurveTo(360, 440, 320, 410);
+        ctx.closePath();
+        ctx.fillStyle = topGrad;
+        ctx.fill();
+        ctx.strokeStyle = '#E91E63';
+        ctx.lineWidth = 1;
         ctx.stroke();
 
-        // --- 11. EYES (Green) ---
+        // Chest Bow
+        ctx.beginPath();
+        ctx.moveTo(400, 460);
+        ctx.quadraticCurveTo(420, 440, 440, 460);
+        ctx.quadraticCurveTo(420, 470, 400, 460);
+        ctx.fillStyle = '#C2185B';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(400, 460);
+        ctx.quadraticCurveTo(380, 440, 360, 460);
+        ctx.quadraticCurveTo(380, 470, 400, 460);
+        ctx.fillStyle = '#C2185B';
+        ctx.fill();
+        // Bow knot
+        drawCircle(400, 460, 8, '#AD1457');
+        // Ribbons
+        ctx.beginPath();
+        ctx.moveTo(400, 468);
+        ctx.quadraticCurveTo(410, 490, 405, 510);
+        ctx.quadraticCurveTo(395, 510, 390, 490);
+        ctx.quadraticCurveTo(385, 475, 400, 468);
+        ctx.fillStyle = '#D81B60';
+        ctx.fill();
+        ctx.restore();
+
+        // BLUE SLEEVES (Shoulder wrap)
+        ctx.save();
+        let sleeveGrad = ctx.createLinearGradient(250, 380, 350, 500);
+        sleeveGrad.addColorStop(0, '#3949AB');
+        sleeveGrad.addColorStop(0.5, '#1A237E');
+        sleeveGrad.addColorStop(1, '#0D47A1');
+
+        // Left Sleeve
+        ctx.beginPath();
+        ctx.moveTo(315, 405);
+        ctx.quadraticCurveTo(280, 430, 275, 490);
+        ctx.quadraticCurveTo(260, 490, 260, 475);
+        ctx.quadraticCurveTo(250, 430, 300, 400);
+        ctx.closePath();
+        ctx.fillStyle = sleeveGrad;
+        ctx.fill();
+
+        // Right Sleeve
+        ctx.beginPath();
+        ctx.moveTo(485, 405);
+        ctx.quadraticCurveTo(530, 420, 540, 450);
+        ctx.quadraticCurveTo(530, 460, 520, 450);
+        ctx.quadraticCurveTo(505, 430, 480, 415);
+        ctx.closePath();
+        ctx.fillStyle = sleeveGrad;
+        ctx.fill();
+        ctx.restore();
+    }
+
+    // ==========================================
+    // 6. Head, Face, Hair
+    // ==========================================
+    function drawHeadAndHair() {
+        // ---- LAYER 1: BACK HAIR ----
+        ctx.save();
+        let hairGrad = ctx.createLinearGradient(250, 150, 550, 600);
+        hairGrad.addColorStop(0, '#D7A86E');
+        hairGrad.addColorStop(0.5, '#A5683C');
+        hairGrad.addColorStop(1, '#6D4C29');
+
+        // Large left sweeping strand
+        ctx.beginPath();
+        ctx.moveTo(320, 180);
+        ctx.bezierCurveTo(100, 200, 150, 650, 220, 750);
+        ctx.quadraticCurveTo(240, 660, 280, 520);
+        ctx.quadraticCurveTo(300, 380, 350, 280);
+        ctx.closePath();
+        ctx.fillStyle = hairGrad;
+        ctx.fill();
+
+        // Large right sweeping strand
+        ctx.beginPath();
+        ctx.moveTo(480, 180);
+        ctx.bezierCurveTo(700, 200, 650, 700, 580, 750);
+        ctx.quadraticCurveTo(560, 660, 520, 520);
+        ctx.quadraticCurveTo(500, 380, 450, 280);
+        ctx.closePath();
+        ctx.fillStyle = hairGrad;
+        ctx.fill();
+
+        // Back volume
+        ctx.beginPath();
+        ctx.moveTo(300, 180);
+        ctx.quadraticCurveTo(400, 120, 500, 180);
+        ctx.quadraticCurveTo(550, 300, 520, 400);
+        ctx.quadraticCurveTo(450, 320, 400, 300);
+        ctx.quadraticCurveTo(350, 320, 280, 400);
+        ctx.quadraticCurveTo(250, 300, 300, 180);
+        ctx.closePath();
+        ctx.fillStyle = hairGrad;
+        ctx.fill();
+        ctx.restore();
+
+        // ---- LAYER 2: FACE ----
+        ctx.save();
+        let faceGrad = ctx.createRadialGradient(400, 280, 20, 400, 280, 100);
+        faceGrad.addColorStop(0, '#FFEBE0');
+        faceGrad.addColorStop(0.7, '#FAD6C4');
+        faceGrad.addColorStop(1, '#E5C0AE');
+
+        ctx.beginPath();
+        ctx.moveTo(400, 180);
+        ctx.quadraticCurveTo(470, 190, 480, 270);
+        ctx.quadraticCurveTo(485, 320, 450, 360);
+        ctx.quadraticCurveTo(430, 380, 400, 385);
+        ctx.quadraticCurveTo(370, 380, 350, 360);
+        ctx.quadraticCurveTo(315, 320, 320, 270);
+        ctx.quadraticCurveTo(330, 190, 400, 180);
+        ctx.closePath();
+        ctx.fillStyle = faceGrad;
+        ctx.fill();
+        ctx.restore();
+
+        // ---- LAYER 3: EYES ----
+        ctx.save();
         // Left Eye
         ctx.beginPath();
-        ctx.ellipse(-17, 90, 12, 16, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "#ffffff";
+        ctx.ellipse(360, 290, 22, 18, -0.1, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff'; // Sclera
         ctx.fill();
-        ctx.strokeStyle = "#3e2723";
-        ctx.lineWidth = 2;
-        ctx.stroke();
         // Iris
+        let eyeGrad = ctx.createRadialGradient(360, 295, 5, 360, 290, 20);
+        eyeGrad.addColorStop(0, '#A5D6A7');
+        eyeGrad.addColorStop(0.6, '#2E7D32');
+        eyeGrad.addColorStop(1, '#1B5E20');
         ctx.beginPath();
-        ctx.ellipse(-17, 92, 8, 10, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "#2e7d32"; // Dark Green
-        ctx.fill();
-        ctx.beginPath();
-        ctx.ellipse(-15, 89, 4, 6, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "#81c784"; // Light Green
+        ctx.ellipse(362, 290, 16, 15, -0.1, 0, Math.PI * 2);
+        ctx.fillStyle = eyeGrad;
         ctx.fill();
         // Pupil
+        drawCircle(363, 292, 8, '#000000');
+        // Highlights
+        drawCircle(358, 285, 6, '#ffffff');
+        drawCircle(366, 292, 3, '#ffffff');
+        // Eyelash (Top)
         ctx.beginPath();
-        ctx.ellipse(-17, 95, 3, 4, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "#1b1b1b";
-        ctx.fill();
-        // Eye shine
-        ctx.beginPath();
-        ctx.ellipse(-15, 87, 2, 3, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "#ffffff";
-        ctx.fill();
+        ctx.moveTo(335, 278);
+        ctx.quadraticCurveTo(360, 270, 385, 280);
+        ctx.strokeStyle = '#333333';
+        ctx.lineWidth = 4;
+        ctx.stroke();
 
         // Right Eye
         ctx.beginPath();
-        ctx.ellipse(17, 90, 12, 16, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "#ffffff";
+        ctx.ellipse(440, 290, 22, 18, 0.1, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
         ctx.fill();
-        ctx.stroke();
+        // Iris
         ctx.beginPath();
-        ctx.ellipse(17, 92, 8, 10, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "#2e7d32";
+        ctx.ellipse(438, 290, 16, 15, 0.1, 0, Math.PI * 2);
+        ctx.fillStyle = eyeGrad;
         ctx.fill();
+        // Pupil
+        drawCircle(437, 292, 8, '#000000');
+        // Highlights
+        drawCircle(442, 285, 6, '#ffffff');
+        drawCircle(434, 292, 3, '#ffffff');
+        // Eyelash
         ctx.beginPath();
-        ctx.ellipse(19, 89, 4, 6, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "#81c784";
-        ctx.fill();
-        ctx.beginPath();
-        ctx.ellipse(17, 95, 3, 4, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "#1b1b1b";
-        ctx.fill();
-        ctx.beginPath();
-        ctx.ellipse(19, 87, 2, 3, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "#ffffff";
-        ctx.fill();
-
-        // --- 12. MOUTH & BLUSH ---
-        ctx.beginPath();
-        ctx.arc(0, 125, 5, 0, Math.PI);
-        ctx.fillStyle = "#e57373";
-        ctx.fill();
-        
-        // Blush
-        ctx.beginPath();
-        ctx.ellipse(-25, 110, 10, 5, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(255, 138, 101, 0.4)";
-        ctx.fill();
-        ctx.beginPath();
-        ctx.ellipse(25, 110, 10, 5, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        // --- 13. HAIR (Complex Layering) ---
-        // Back Hair (Behind head)
-        ctx.beginPath();
-        ctx.moveTo(-40, 140);
-        ctx.quadraticCurveTo(-70, 200, -60, 280);
-        ctx.quadraticCurveTo(-30, 300, -20, 250);
-        ctx.quadraticCurveTo(-15, 200, -20, 150);
-        ctx.closePath();
-        ctx.fillStyle = "#d7a86e";
-        ctx.fill();
-        ctx.strokeStyle = "#b8956a";
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(40, 140);
-        ctx.quadraticCurveTo(70, 200, 60, 280);
-        ctx.quadraticCurveTo(30, 300, 20, 250);
-        ctx.quadraticCurveTo(15, 200, 20, 150);
-        ctx.closePath();
-        ctx.fillStyle = "#d7a86e";
-        ctx.fill();
-        ctx.stroke();
-
-        // Front Bangs
-        ctx.beginPath();
-        ctx.moveTo(-45, 20);
-        ctx.quadraticCurveTo(-20, -5, -5, 30);
-        ctx.quadraticCurveTo(-25, 40, -40, 50);
-        ctx.closePath();
-        ctx.fillStyle = "#e0b68b";
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(45, 20);
-        ctx.quadraticCurveTo(20, -5, 5, 30);
-        ctx.quadraticCurveTo(25, 40, 40, 50);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(-20, 10);
-        ctx.quadraticCurveTo(0, -10, 20, 10);
-        ctx.quadraticCurveTo(0, 20, -20, 10);
-        ctx.closePath();
-        ctx.fillStyle = "#cda37a";
-        ctx.fill();
-        ctx.stroke();
-
-        // Side Hair (Flowing)
-        ctx.beginPath();
-        ctx.moveTo(-30, 40);
-        ctx.quadraticCurveTo(-50, 150, -80, 250);
-        ctx.quadraticCurveTo(-60, 270, -40, 200);
-        ctx.quadraticCurveTo(-20, 100, -15, 50);
-        ctx.closePath();
-        ctx.fillStyle = "#e0b68b";
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(30, 40);
-        ctx.quadraticCurveTo(50, 150, 80, 250);
-        ctx.quadraticCurveTo(60, 270, 40, 200);
-        ctx.quadraticCurveTo(20, 100, 15, 50);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        // Ahoge (Cowlick on top)
-        ctx.beginPath();
-        ctx.moveTo(0, 5);
-        ctx.quadraticCurveTo(15, -20, 30, -10);
-        ctx.quadraticCurveTo(20, -5, 10, 10);
-        ctx.closePath();
-        ctx.fillStyle = "#e0b68b";
-        ctx.fill();
-
-        // --- 14. CHOKER ---
-        ctx.beginPath();
-        ctx.rect(-15, 180, 30, 5);
-        ctx.fillStyle = "#3e2723";
-        ctx.fill();
-
-        ctx.restore(); // Pop head transform
-
-        // --- 15. BELT STRAP HANGING (Effect from image) ---
-        ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(30, 270);
-        ctx.quadraticCurveTo(80, 290, 100, 340);
-        ctx.quadraticCurveTo(110, 370, 90, 400);
-        ctx.strokeStyle = "#5d4037";
-        ctx.lineWidth = 8;
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(-30, 270);
-        ctx.quadraticCurveTo(-80, 290, -100, 340);
-        ctx.quadraticCurveTo(-110, 370, -90, 400);
+        ctx.moveTo(415, 280);
+        ctx.quadraticCurveTo(440, 270, 465, 278);
+        ctx.strokeStyle = '#333333';
+        ctx.lineWidth = 4;
         ctx.stroke();
         ctx.restore();
 
-        ctx.restore(); // Pop main transform
+        // ---- LAYER 4: NOSE & MOUTH ----
+        ctx.save();
+        // Nose
+        ctx.beginPath();
+        ctx.moveTo(395, 320);
+        ctx.quadraticCurveTo(405, 335, 400, 350);
+        ctx.strokeStyle = '#D4A594';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        // Mouth
+        ctx.beginPath();
+        ctx.moveTo(385, 365);
+        ctx.quadraticCurveTo(400, 375, 415, 365);
+        ctx.fillStyle = '#E57373';
+        ctx.fill();
+        ctx.strokeStyle = '#D32F2F';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        // Blush
+        ctx.globalAlpha = 0.2;
+        drawEllipse(340, 315, 20, 12, '#FF8A80');
+        drawEllipse(460, 315, 20, 12, '#FF8A80');
+        ctx.globalAlpha = 1.0;
+        ctx.restore();
+
+        // ---- LAYER 5: FRONT HAIR (Bangs & Side locks) ----
+        ctx.save();
+        // Front bangs (Base)
+        ctx.beginPath();
+        ctx.moveTo(310, 180);
+        ctx.quadraticCurveTo(380, 140, 490, 180);
+        ctx.quadraticCurveTo(480, 220, 420, 260);
+        ctx.quadraticCurveTo(400, 270, 380, 260);
+        ctx.quadraticCurveTo(320, 220, 310, 180);
+        ctx.closePath();
+        ctx.fillStyle = '#B07144';
+        ctx.fill();
+
+        // Bang Strands (Overlapping)
+        ctx.beginPath();
+        ctx.moveTo(320, 190);
+        ctx.quadraticCurveTo(350, 180, 390, 250);
+        ctx.quadraticCurveTo(370, 230, 340, 210);
+        ctx.quadraticCurveTo(330, 200, 320, 190);
+        ctx.fillStyle = '#A5683C';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(480, 190);
+        ctx.quadraticCurveTo(450, 180, 410, 250);
+        ctx.quadraticCurveTo(430, 230, 460, 210);
+        ctx.quadraticCurveTo(470, 200, 480, 190);
+        ctx.fillStyle = '#A5683C';
+        ctx.fill();
+
+        // Side locks (Left)
+        ctx.beginPath();
+        ctx.moveTo(320, 200);
+        ctx.quadraticCurveTo(280, 250, 290, 400);
+        ctx.quadraticCurveTo(280, 450, 270, 480);
+        ctx.quadraticCurveTo(300, 420, 320, 350);
+        ctx.quadraticCurveTo(330, 250, 340, 230);
+        ctx.closePath();
+        ctx.fillStyle = '#A5683C';
+        ctx.fill();
+        // Highlight on lock
+        ctx.beginPath();
+        ctx.moveTo(315, 210);
+        ctx.quadraticCurveTo(295, 280, 305, 370);
+        ctx.quadraticCurveTo(300, 340, 310, 260);
+        ctx.quadraticCurveTo(320, 220, 315, 210);
+        ctx.fillStyle = 'rgba(215, 168, 110, 0.5)';
+        ctx.fill();
+
+        // Side locks (Right)
+        ctx.beginPath();
+        ctx.moveTo(480, 200);
+        ctx.quadraticCurveTo(520, 250, 510, 400);
+        ctx.quadraticCurveTo(520, 450, 530, 480);
+        ctx.quadraticCurveTo(500, 420, 480, 350);
+        ctx.quadraticCurveTo(470, 250, 460, 230);
+        ctx.closePath();
+        ctx.fillStyle = '#A5683C';
+        ctx.fill();
+        // Highlight on lock
+        ctx.beginPath();
+        ctx.moveTo(485, 210);
+        ctx.quadraticCurveTo(505, 280, 495, 370);
+        ctx.quadraticCurveTo(500, 340, 490, 260);
+        ctx.quadraticCurveTo(480, 220, 485, 210);
+        ctx.fillStyle = 'rgba(215, 168, 110, 0.5)';
+        ctx.fill();
+        ctx.restore();
     }
 
-    // --- ANIMATION LOOP ---
-    function animate() {
+    // ==========================================
+    // Main Draw Execution
+    // ==========================================
+    function drawAnimeGirl() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Center point to draw
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2 - 50;
+        // 1. Environment
+        drawShadow();
 
-        // Animate the girl
-        drawAnimeGirl(centerX, centerY, 1.0, walkCycle);
+        // 2. Background Hair (Back)
+        // Note: We draw it first so it sits behind the body.
+        ctx.save();
+        let hairGradBack = ctx.createLinearGradient(250, 150, 550, 600);
+        hairGradBack.addColorStop(0, '#D7A86E');
+        hairGradBack.addColorStop(1, '#6D4C29');
+        // Back sweep left
+        ctx.beginPath();
+        ctx.moveTo(340, 180);
+        ctx.bezierCurveTo(150, 180, 150, 600, 220, 750);
+        ctx.quadraticCurveTo(240, 650, 290, 500);
+        ctx.quadraticCurveTo(320, 350, 360, 280);
+        ctx.fillStyle = hairGradBack;
+        ctx.fill();
+        // Back sweep right
+        ctx.beginPath();
+        ctx.moveTo(460, 180);
+        ctx.bezierCurveTo(650, 180, 650, 650, 580, 750);
+        ctx.quadraticCurveTo(560, 650, 510, 500);
+        ctx.quadraticCurveTo(480, 350, 440, 280);
+        ctx.fillStyle = hairGradBack;
+        ctx.fill();
+        ctx.restore();
 
-        // Increment cycle for smooth walking effect
-        walkCycle += 0.05;
+        // 3. Body Elements
+        drawLegs();
+        drawShoes();
+        drawShorts();
+        drawTorsoAndArms();
 
-        requestAnimationFrame(animate);
+        // 4. Face & Front Hair
+        drawHeadAndHair();
+
+        // 5. Finishing Touch: Floating strands to emphasize the dynamic feel
+        ctx.save();
+        ctx.strokeStyle = '#A5683C';
+        ctx.lineWidth = 3;
+        // Left floating strand
+        ctx.beginPath();
+        ctx.moveTo(320, 220);
+        ctx.quadraticCurveTo(240, 300, 280, 380);
+        ctx.stroke();
+        // Right floating strand
+        ctx.beginPath();
+        ctx.moveTo(480, 220);
+        ctx.quadraticCurveTo(560, 300, 520, 380);
+        ctx.stroke();
+        ctx.restore();
     }
 
-    // Start the animation
-    animate();
+    // Trigger the drawing
+    drawAnimeGirl();
 
 </script>
+
 </body>
 </html>
